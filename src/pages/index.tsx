@@ -11,6 +11,7 @@ import userAvatar from '../assets/avatares.png';
 import iconCheckImg from '../assets/icon-check.svg';
 import { api } from '../lib/axios';
 import { FormEvent, useState } from 'react';
+import Swal from 'sweetalert2';
 
 export default function Home(props: HomeProps) {
   const [poolTitle, setPoolTitle] = useState('');
@@ -21,17 +22,42 @@ export default function Home(props: HomeProps) {
       const res = await api.post('/pools', {
         title: poolTitle
       });
-      
+
       const { code } = res.data
 
-      await navigator.clipboard.writeText(code)
-      alert('Bolão criado com sucesso! O código foi copiado para a área de transferência')
+      Swal.fire({
+        icon: 'success',
+        title: 'Bolão criado com sucesso',
+        html: 'CÓDIGO: <strong>'+code+'</strong>',
+        color: 'white',
+        background: '#202024',
+        confirmButtonText: 'Copiar'
+      }).then((res) => {
+        if(res.isConfirmed) {
+          navigator.clipboard.writeText(code)
+
+          Swal.fire({
+            position: 'top-end',
+            icon: 'success',
+            title: 'Código copiado com sucesso!',
+            showConfirmButton: false,
+            color: 'white',
+            background: '#202024',
+            timer: 1500
+          })
+        }
+      })
+      
     } catch (err) {
       console.log(err);
-      alert('Falha ao criar o bolão, tente novamente!');
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Falha ao criar o bolão, tente novamente!'
+      })
     }
-    
-
+   
+    setPoolTitle('')
   }
   return (
     <div className='max-w-[1124px] mx-auto grid grid-cols-2 items-center h-screen gap-28'>
